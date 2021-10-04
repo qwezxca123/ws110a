@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <style>
+    @import url("9x9.css");
+    </style>
+    <body id="9x9">
+
+    </body>
+    <script>
+    let x = document.getElementById("9x9")
+    let y = ""
+    let num=[1,2,3,4,5,6,7,8,9]
+
+    y+="<table>"
+    y += "<tr><th class=t>x</th>"
+
+    for (let i of num)
+    {
+        y+="<th class=t>"
+        y+=i
+        y+="</th>"
+    }
+    y+="</tr>"
+
+    for (let i of num)
+    {
+        y+="<tr>"
+        y+="<th class=t>"
+        y+=i
+        for (let j of num)
+        {
+            y+="<th>"
+            y+=i*j
+            y+="</th>"
+        }
+
+        y+="</tr>"
+    }
+    y+="</table>"
+    x.innerHTML=y
+    </script>
+</html>
