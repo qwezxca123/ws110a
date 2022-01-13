@@ -17,19 +17,19 @@
 </html>
 <script>
     function main(){
-        ctx.clearRect(0,0,canvas.width,canvas.height)
+        ctx.clearRect(0,0,canvas.width,canvas.height) //清空畫布
         for(i of cl){
             for(j of cl){
                 if(i!=j){
-                    i.bump(j)
+                    i.bump(j) //不斷挑兩個球偵測碰撞
                 }
             }
             
-            i.wall()
-            i.move()
-            i.show()
+            i.wall() //偵測牆壁碰撞的函數
+            i.move() //座標移動
+            i.show() //繪製
         }
-        window.requestAnimationFrame(main)
+        window.requestAnimationFrame(main)//製作動畫的函數
     }
     class circle{
         
@@ -37,21 +37,21 @@
             this.x = x
             this.y = y
             this.r = r
-            this.vx = vx
-            this.vy = vy
+            this.vx = vx //橫向速率
+            this.vy = vy //縱向速率
         }
-        show(){
+        show(){ //畫球
             ctx.beginPath()
             ctx.arc(this.x , this.y , this.r, 0 , 4*Math.PI, false)
             ctx.fillStyle = '#1E90FF'
             ctx.fill()
             ctx.closePath()
         }
-        move(){
+        move(){ //移動
             this.x += this.vx
             this.y += this.vy
         }
-        wall(){
+        wall(){ //撞牆
             if(this.x+this.r > canvas.width || this.x-this.r < 0){
                 this.vx*=-1
             }
@@ -59,27 +59,24 @@
                 this.vy*=-1
             }
         }
-        bump(goal){
+        bump(goal){ //碰撞偵測 (重寫很多遍還是不行的部分)
             let x = this.x - goal.x
             let y = this.y - goal.y
-            let z = (x**2 + y**2)**0.5
-            if(this.r + goal.r > z){
+            let z = (x**2 + y**2)**0.5 //球心距
+            if(this.r + goal.r > z){ //若碰撞
                 console.log(this,goal)
                 let x = goal.x - this.x
                 let y = goal.y - this.y 
                 let z = (x**2+y**2)**0.5
                 let sec,csc
-                console.log(x,y,z)
                 if(z!=0){
                     if(x!=0){sec = z/x}
                     else{sec = 0}
                     if(y!=0){csc = z/y}
                     else{csc = 0}
-                    console.log(this.vx*sec + this.vy*csc,goal.vx*sec + goal.vy*csc)
-                    let f = (this.r**2*(this.vx*sec + this.vy*csc) - goal.r**2*(goal.vx*sec + goal.vy*csc))
-                    this.vx = this.vx - f/(this.r**2)*(x/z)
+                    let f = (this.r**2*(this.vx*sec + this.vy*csc) - goal.r**2*(goal.vx*sec + goal.vy*csc)) //雖然用f但其實比較接近動量的概念
+                    this.vx = this.vx - f/(this.r**2)*(x/z)                                                 //用體積作為質量比
                     this.vy = this.vy - f/(this.r**2)*(y/z)
-                    console.log(this.vx,this.vy)
                     goal.vx = goal.vx + f/(goal.r**2)*(x/z)
                     goal.vy = goal.vy + f/(goal.r**2)*(y/z)
                 }
