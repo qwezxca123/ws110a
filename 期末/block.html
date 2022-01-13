@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        div>div{border: black solid 1px;padding: 10px;}
+        div>p{display: inline;}
+    </style>
+    <body id = "body" style="background-color: #bbd7ff;">
+        <div style="position: fixed; left: 0px;background-color: rgb(136, 164, 241);width: 350px;font-size: 40px;top:50px">
+            <div>最高分數：<p id="topone">0</p></div>
+            <div>目前分數：<p id="score">0</p></div>
+            <div>難度等級：<p id="lv">0</p></div>
+        </div>
+        <div style="position: fixed;right: 0px;background-color: burlywood;width: 400px;top: 300px;font-size: 30px;padding: 20px;border: black solid 1px;">
+            移動滑鼠來控制!<br><br>
+            
+            每過一定時間方塊下落<br><br>
+
+            同時難度增加<br><br>
+
+            方塊下落間隔減少<br><br>
+
+            方塊分數等於難度
+        </div>
+        <canvas id="canvas" width="500px" height="600px" style="border: solid black 1px; position: fixed;">123</canvas>
+    </body>
+    <script>
+        var visible = []
+        var store = []
+        var canvas = document.getElementById("canvas")
+        var board = canvas.getContext("2d")
+        var body = document.getElementById("body")
+        var sqrt2 = Math.sqrt(2)
+        var score = document.getElementById("score")
+        var topone = document.getElementById("topone")
+        var lv = document.getElementById("lv")
+        var x,y,time=15000
+        var ball = {
+            x:250,
+            y:535,
+            r:15,
+            mx:3,
+            my:-4,
+            max:5
+        }
+        var plate = {
+            x:250,
+            y:560,
+            height:20,
+            width:100
+        }
+        var index
+        if(localStorage.getItem("topscore")=="undefined")topone.innerText = "0"
+        else topone.innerText = localStorage.getItem("topscore")
+        canvas.style.left = (body.scrollWidth/2-canvas.scrollWidth/2).toString()+"px"
+        canvas.addEventListener("mousemove",(event)=>
+        {
+            plate.x = event.clientX - (body.scrollWidth - canvas.scrollWidth)/2
+        })
+        start()
+        
+        function again()
+        {
+            if(parseInt(score.innerText)>parseInt(topone.innerText))
+            {
+                localStorage.setItem("topscore",score.innerText)
+            }
+
+
+            location.reload()
+        }
+        function add()//加分
+        {
+            score.innerText = parseInt(score.innerText)+parseInt(lv.innerText)
+        }
+        function test()
+        {
+            if(ball.y-ball.r<0 && ball.my<0){ball.my *= -1}//上牆
+            if(ball.x-ball.r<0 && ball.mx<0){ball.mx *= -1}//左牆
+            if(ball.x+ball.r>canvas.width && ball.mx>0){ball.mx *= -1}//右牆
+            if(ball.y+ball.r>canvas.height){again()}//gg
+
+            //碰撞盤子根據碰撞位置改變速率
+            if(ball.y+ball.r>=plate.y-plate.height/2 && ball.y+ball.r<plate.y)//下點
+            {
+                if(ball.x>=plate.x-plate.width/2 && ball.x<=plate.x+plate.width/2)
+                {
+                    if(ball.my>0)
+                    {
+                        ball.mx = 4.5*(ball.x - plate.x)/(plate.width/2)
+                        ball.my = -Math.sqrt(Math.pow(ball.max,2)-ball.mx*ball.mx)
+                    }
+                }
+            }
+            if(ball.y+ball.r/sqrt2>=plate.y-plate.height/2 && ball.y+ball.r/sqrt2<plate.y)//左下&右下點
+            {
+                if(ball.x - ball.r/sqrt2>=plate.x-plate.width/2 && ball.x - ball.r/sqrt2<=plate.x+plate.width/2)//左下點
+                {
+                    if(ball.my>0)
+                    {
+                        ball.mx = 4.5
+                        ball.my = -Math.sqrt(Math.pow(ball.max,2)-ball.mx*ball.mx)
+                    }
+                }
+                if(ball.x + ball.r/sqrt2>=plate.x-plate.width/2 && ball.x + ball.r/sqrt2<=plate.x+plate.width/2)//左下點
+                {
+                    if(ball.my>0)
+                    {
+                        ball.mx = -4.5
+                        ball.my = -Math.sqrt(Math.pow(ball.max,2)-ball.mx*ball.mx)
+                    }
+                }
+            }
+            if(ball.y>=plate.y-plate.height/2 && ball.y<plate.y+plate.height/2)//左&右點
+            {
+                if(ball.x - ball.r>=plate.x-plate.width/2 && ball.x - ball.r<=plate.x+plate.width/2)//左下點
+                {
+                    if(ball.my>0)
+                    {
+                        ball.mx = 2
+                    }
+                }
+                if(ball.x + ball.r>=plate.x-plate.width/2 && ball.x + ball.r<=plate.x+plate.width/2)//左下點
+                {
+                    if(ball.my>0)
+                    {
+                        ball.mx = -2
+                    }
+                }
+            }
+
+            //判斷所在格 若存在則消除並加分
+            if(ball.y-ball.r<450)//上點在磚塊可能區
+            {
+                //上點
+                if(ball.y-ball.r<0)ball.y=ball.r
+                index = Math.floor((ball.y-ball.r)/50)*10+Math.floor(ball.x/50)
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.my *= -1
+                    add()
+                }
+            }
+            if(ball.y-ball.r/sqrt2<450)
+            {
+                //左上點
+                index = Math.floor((ball.y-ball.r/sqrt2)/50)*10+Math.floor((ball.x-ball.r/sqrt2)/50)//左上點所在格
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.my *= -1
+                    ball.mx *= -1
+                    add()
+                }
+                //右上點
+                index = Math.floor((ball.y-ball.r/sqrt2)/50)*10+Math.floor((ball.x+ball.r/sqrt2)/50)//左上點所在格
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.my *= -1
+                    ball.mx *= -1
+                    add()
+                }
+            }
+            if(ball.y<450)
+            {
+                //左點
+                if(ball.x-ball.r <0 )ball.x = ball.r//除錯
+                index = Math.floor((ball.y)/50)*10+Math.floor((ball.x-ball.r)/50)
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.mx *= -1
+                    add()
+                }
+                //右點
+                if(ball.x+ball.r >= 500) ball.x=canvas.scrollWidth-ball.r//除錯
+                index = Math.floor((ball.y)/50)*10+Math.floor((ball.x+ball.r)/50)
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.mx *= -1
+                    add()
+                }
+            }
+            if(ball.y+ball.r/sqrt2 <450)
+            {
+                //左下點
+                index = Math.floor((ball.y+ball.r/sqrt2)/50)*10+Math.floor((ball.x-ball.r/sqrt2)/50)//左上點所在格
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.my *= -1
+                    ball.mx *= -1
+                    add()
+                }
+                //右下點
+                index = Math.floor((ball.y+ball.r/sqrt2)/50)*10+Math.floor((ball.x+ball.r/sqrt2)/50)//左上點所在格
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.my *= -1
+                    ball.mx *= -1
+                    add()
+                }
+            }
+            if(ball.y+ball.r<450)
+            {
+                //下點
+                index = Math.floor((ball.y+ball.r)/50)*10+Math.floor(ball.x/50)
+                if(visible[index]==1)
+                {
+                    visible[index]=0
+                    ball.my *= -1
+                    add()
+                }
+            }
+        }
+        function ballmove()
+        {
+            ball.x += ball.mx
+            ball.y += ball.my  
+        }
+        function start()
+        {
+            reset()
+            timeout()
+            renew()
+        }
+        function renew()
+        {
+            ballmove()
+            test()
+            draw()
+
+            window.requestAnimationFrame(renew)
+        } 
+        function timeout()
+        {
+            newblock()
+            lv.innerText = parseInt(lv.innerText)+1
+            time-=200
+            setTimeout(timeout,time)
+        }
+        function newblock()
+        {
+            for(var i=80;i<90;i++)
+            {
+                if(visible[i]==1) again()//gg
+            }
+            for(var i=89;i>=10;i--)
+            {
+                visible[i]=visible[i-10]
+            }
+            for(var i=0;i<10;i++)
+            {
+                visible[i]=store[i]
+                store[i]= Math.floor(Math.random()*2)
+            }
+        }
+        function reset()
+        {
+            for(var i=0 ;i<90;i++){visible[i] = 0}
+            for(var i=0 ;i<10;i++){store[i]= 1}
+        }
+        function draw()
+        {
+            //清空
+            board.clearRect(0,0,board.width,board.height)
+
+            //背景
+            board.beginPath()
+            board.fillStyle = "#ECF5FF"
+            board.fillRect(0,0,500,600)
+            
+            //球
+            board.arc(ball.x,ball.y,ball.r,0,Math.PI*2)
+            board.fillStyle = "#FFD306"
+            board.fill()
+            board.stroke()
+
+            //盤子
+            board.beginPath()
+            board.fillStyle = "#0080FF"
+            board.fillRect(plate.x-plate.width/2,plate.y-plate.height/2,plate
+            .width,plate.height)
+            
+            //磚塊
+            board.beginPath()
+            for(var i=0;i<80;i++)
+            {
+                x = (i%10)*50
+                y = Math.floor(i/10)*50
+                if(visible[i]==1)
+                {
+                    board.rect(x,y,50,50)
+                    board.fillStyle = "#84C1FF"
+                    board.fill()
+                    board.stroke()
+                }
+            }
+            board.beginPath()
+            for(var i=80;i<90;i++)
+            {
+                x = (i%10)*50
+                y = Math.floor(i/10)*50
+                if(visible[i]==1)
+                {
+                    board.rect(x,y,50,50)
+                    board.fillStyle = "#F75000"
+                    board.fill()
+                    board.stroke()
+                }
+            }
+        }
+
+    </script>
+</html>

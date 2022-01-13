@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<style>
+    div {
+        display: inline-block;
+        width: 33%;
+        height: 50px;
+        font-size: 30px;
+        text-align: center;
+        }
+    div:hover{
+        color: rgb(204, 255, 230);
+        background-color: blanchedalmond;
+    }
+</style>
+<html>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <div onclick="iframe.src = 'canvas.html'"style = "background-color:cornflowerblue;">期中作業</div>
+    <div onclick="iframe.src = 'block.html'" style="background-color:rgb(243, 243, 125);">打磚塊</div>
+    <div onclick="iframe.src = 'person.html'" style="background-color: rgb(90, 248, 98);">個人網站嘗試</div>
+    <iframe id = 'iframe' src="" height="750px" width="1500px"></iframe> </iframe>
+</html>
+<script>
+    let iframe = document.getElementById('iframe')
+</script>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<style>
+    canvas {
+            background-color: rgb(184, 216, 241);
+            position: absolute;
+            margin:auto;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-style: solid;
+        }
+</style>
+<html>
+    <canvas id="canvas" width="1500px" height="700px"></canvas>
+</html>
+<script>
+    function main(){
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        for(i of cl){
+            for(j of cl){
+                if(i!=j){
+                    i.bump(j)
+                }
+            }
+            
+            i.wall()
+            i.move()
+            i.show()
+        }
+        window.requestAnimationFrame(main)
+    }
+    class circle{
+        
+        constructor(x,y,r,vx,vy){
+            this.x = x
+            this.y = y
+            this.r = r
+            this.vx = vx
+            this.vy = vy 
+            this.cvx = 0
+            this.cvy = 0   
+        }
+        show(){
+            ctx.beginPath()
+            ctx.arc(this.x , this.y , this.r, 0 , 4*Math.PI, false)
+            ctx.fillStyle = '#1E90FF'
+            ctx.fill()
+            ctx.closePath()
+        }
+        move(){
+            this.x += this.vx
+            this.y += this.vy
+        }
+        wall(){
+            if(this.x+this.r > canvas.width || this.x-this.r < 0){
+                this.vx*=-1
+            }
+            if(this.y+this.r > canvas.height || this.y-this.r < 0){
+                this.vy*=-1
+            }
+        }
+        bump(goal){
+            let x = this.x - goal.x
+            let y = this.y - goal.y
+            let z = (x**2 + y**2)**0.5
+            if(this.r + goal.r > z){
+                let x = this.x - goal.x
+                let y = this.y - goal.y
+                let z = (x**2+y**2)**0.5
+                console.log(x,y,z)
+                if(x!=0 && y!=0)
+                {
+                    //待續
+                    console.log("50",x,y)
+                }
+                else if(y==0)
+                {
+                    let f = Math.abs(this.r**2*(this.vx*z/x)) + Math.abs(goal.r**2*(goal.vx*z/x))
+                    this.cvx = f/(this.r**2)*x/z
+                    this.cvy = 0
+                }
+                else
+                {
+                    let f = Math.abs(this.r**2*(this.vy*z/y)) + Math.abs(goal.r**2*(goal.vy*z/y))
+                    this.cvx = 0
+                    this.cvy = f/(this.r**2)*y/z
+                }
+                this.vx += this.cvx
+                this.vy += this.cvy
+                goal.vx += -this.cvx
+                goal.vy += -this.cvy
+            }
+            
+        }
+    }
+    canvas = document.getElementById('canvas')
+    ctx = canvas.getContext('2d')
+    
+    cl = [new circle(500,500,50,-5,5),
+          new circle(500,100,50,-5,-5),
+         ]
+    
+    main()
+</script>
